@@ -17,6 +17,7 @@ const EXPLOSION_SHEET: &str = "explo_a_sheet.png";
 const SCALE: f32 = 0.5;
 const TIME_STEP: f32 = 1. / 60.;
 const MAX_ENEMIES: u32 = 1;
+const PLAYER_RESPAWN_DELAY: f64 = 2.;
 
 // region:    Resources
 pub struct Materials {
@@ -32,7 +33,30 @@ struct WinSize {
 	h: f32,
 }
 struct ActiveEnemies(u32);
-struct PlayerOn(bool);
+
+struct PlayerState {
+	on: bool,
+	last_shot: f64,
+}
+impl Default for PlayerState {
+	fn default() -> Self {
+		Self {
+			on: false,
+			last_shot: 0.,
+		}
+	}
+}
+impl PlayerState {
+	fn spawned(&mut self) {
+		self.on = true;
+		self.last_shot = 0.;
+	}
+	fn shot(&mut self, time: f64) {
+		self.on = false;
+		self.last_shot = time;
+	}
+}
+
 // endregion: Resources
 
 // region:    Components
@@ -149,7 +173,8 @@ fn plaser_hit_enemy(
 
 fn elaser_hit_player(
 	mut commands: Commands,
-	mut player_on: ResMut<PlayerOn>,
+	mut player_state: ResMut<PlayerState>,
+	time: Res<Time>,
 	player_query: Query<(Entity, &Transform, &Sprite), With<Player>>,
 	elaser_query: Query<(Entity, &Transform, &Sprite), With<ELaser>>,
 ) {
@@ -169,7 +194,8 @@ fn elaser_hit_player(
 			if let Some(_) = collision {
 				// remove the player
 				commands.entity(player_entity).despawn();
-				player_on.0 = false;
+				player_state.shot(time.seconds_since_startup());
+
 				// remove the laser
 				commands.entity(elaser_entity).despawn();
 				// spawn ExplosionToSpawn

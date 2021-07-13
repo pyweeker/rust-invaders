@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use crate::{
-	ActiveEnemies, ELaser, Enemy, Laser, Materials, PlayerOn, Speed, WinSize, MAX_ENEMIES, SCALE,
+	ActiveEnemies, ELaser, Enemy, Laser, Materials, PlayerState, Speed, WinSize, MAX_ENEMIES, SCALE,
 	TIME_STEP,
 };
 use bevy::{core::FixedTimestep, prelude::*};
@@ -70,16 +70,16 @@ fn enemy_movement(time: Res<Time>, mut query: Query<(&mut Transform, &Speed), Wi
 		let x_dst = radius.0 * angle.cos();
 		let y_dst = radius.1 * angle.sin();
 
-		// calculate the delta x/y and distance ratio (dr)
+		// calculate the delta x/y and distance ratio
 		let dx = x_org - x_dst;
 		let dy = y_org - y_dst;
-		let dd = (dx * dx + dy * dy).sqrt();
-		let dr = TIME_STEP * speed.0 / dd;
+		let distance = (dx * dx + dy * dy).sqrt();
+		let distance_ratio = TIME_STEP * speed.0 / distance;
 
 		// calculate the final x/y (make sure to not overshoot)
-		let x = x_org - dx * dr;
+		let x = x_org - dx * distance_ratio;
 		let x = if dx > 0. { x.max(x_dst) } else { x.min(x_dst) };
-		let y = y_org - dy * dr;
+		let y = y_org - dy * distance_ratio;
 		let y = if dy > 0. { y.max(y_dst) } else { y.min(y_dst) };
 		// apply to tranformation
 		tf.translation.x = x;
@@ -90,10 +90,10 @@ fn enemy_movement(time: Res<Time>, mut query: Query<(&mut Transform, &Speed), Wi
 fn enemy_fire(
 	mut commands: Commands,
 	materials: Res<Materials>,
-	player_on: Res<PlayerOn>,
+	playser_state: Res<PlayerState>,
 	enemy_query: Query<&Transform, With<Enemy>>,
 ) {
-	if player_on.0 {
+	if playser_state.on {
 		for &tf in enemy_query.iter() {
 			let x = tf.translation.x;
 			let y = tf.translation.y;
