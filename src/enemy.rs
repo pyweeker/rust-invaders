@@ -1,5 +1,6 @@
 use crate::{
-	ActiveEnemies, ELaser, Enemy, Laser, Materials, Speed, WinSize, MAX_ENEMIES, SCALE, TIME_STEP,
+	ActiveEnemies, ELaser, Enemy, Laser, Materials, PlayerOn, Speed, WinSize, MAX_ENEMIES, SCALE,
+	TIME_STEP,
 };
 use bevy::{core::FixedTimestep, prelude::*};
 use rand::{thread_rng, Rng};
@@ -57,24 +58,27 @@ fn enemy_spawn(
 fn enemy_fire(
 	mut commands: Commands,
 	materials: Res<Materials>,
+	player_on: Res<PlayerOn>,
 	enemy_query: Query<&Transform, With<Enemy>>,
 ) {
-	for &tf in enemy_query.iter() {
-		let x = tf.translation.x;
-		let y = tf.translation.y;
-		commands
-			.spawn_bundle(SpriteBundle {
-				material: materials.elaser.clone(),
-				transform: Transform {
-					translation: Vec3::new(x, y - 15., 0.),
-					scale: Vec3::new(SCALE, -SCALE, 1.),
+	if player_on.0 {
+		for &tf in enemy_query.iter() {
+			let x = tf.translation.x;
+			let y = tf.translation.y;
+			commands
+				.spawn_bundle(SpriteBundle {
+					material: materials.elaser.clone(),
+					transform: Transform {
+						translation: Vec3::new(x, y - 15., 0.),
+						scale: Vec3::new(SCALE, -SCALE, 1.),
+						..Default::default()
+					},
 					..Default::default()
-				},
-				..Default::default()
-			})
-			.insert(ELaser)
-			.insert(Laser)
-			.insert(Speed::default());
+				})
+				.insert(ELaser)
+				.insert(Laser)
+				.insert(Speed::default());
+		}
 	}
 }
 
