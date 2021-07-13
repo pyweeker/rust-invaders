@@ -1,4 +1,6 @@
-use crate::{ActiveEnemies, ELaser, Enemy, Laser, Materials, Speed, WinSize, MAX_ENEMIES, SCALE};
+use crate::{
+	ActiveEnemies, ELaser, Enemy, Laser, Materials, Speed, WinSize, MAX_ENEMIES, SCALE, TIME_STEP,
+};
 use bevy::{core::FixedTimestep, prelude::*};
 use rand::{thread_rng, Rng};
 
@@ -7,6 +9,7 @@ pub struct EnemyPlugin;
 impl Plugin for EnemyPlugin {
 	fn build(&self, app: &mut bevy::prelude::AppBuilder) {
 		app
+			.add_system(elaser_movement.system())
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(1.0))
@@ -72,5 +75,19 @@ fn enemy_fire(
 			.insert(ELaser)
 			.insert(Laser)
 			.insert(Speed::default());
+	}
+}
+
+fn elaser_movement(
+	mut commands: Commands,
+	win_size: Res<WinSize>,
+	mut elaser_query: Query<(Entity, &Speed, &mut Transform), With<ELaser>>,
+) {
+	for (elaser_entity, speed, mut elaser_tf) in elaser_query.iter_mut() {
+		let translation = &mut elaser_tf.translation;
+		translation.y -= speed.0 * TIME_STEP;
+		if translation.y < -win_size.h - 50. {
+			commands.entity(elaser_entity).despawn();
+		}
 	}
 }

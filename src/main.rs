@@ -66,7 +66,8 @@ fn main() {
 		.add_plugin(PlayerPlugin)
 		.add_plugin(EnemyPlugin)
 		.add_startup_system(setup.system())
-		.add_system(laser_hit_enemy.system())
+		.add_system(plaser_hit_enemy.system())
+		.add_system(elaser_hit_player.system())
 		.add_system(explosion_to_spawn.system())
 		.add_system(animate_explosion.system())
 		.run();
@@ -103,7 +104,7 @@ fn setup(
 	window.set_position(IVec2::new(3870, 4830));
 }
 
-fn laser_hit_enemy(
+fn plaser_hit_enemy(
 	mut commands: Commands,
 	laser_query: Query<(Entity, &Transform, &Sprite), With<PLaser>>,
 	enemy_query: Query<(Entity, &Transform, &Sprite), With<Enemy>>,
@@ -132,6 +133,38 @@ fn laser_hit_enemy(
 				commands
 					.spawn()
 					.insert(ExplosionToSpawn(enemy_tf.translation.clone()));
+			}
+		}
+	}
+}
+
+fn elaser_hit_player(
+	mut commands: Commands,
+	player_query: Query<(Entity, &Transform, &Sprite), With<Player>>,
+	elaser_query: Query<(Entity, &Transform, &Sprite), With<ELaser>>,
+) {
+	if let Ok((player_entity, player_tf, player_sprite)) = player_query.single() {
+		let player_size = player_sprite.size * Vec2::from(player_tf.scale.abs());
+
+		for (elaser_entity, elaser_tf, elaser_sprite) in elaser_query.iter() {
+			let elaser_size = elaser_sprite.size * Vec2::from(elaser_tf.scale.abs());
+
+			let collision = collide(
+				elaser_tf.translation,
+				elaser_size,
+				player_tf.translation,
+				player_size,
+			);
+
+			if let Some(_) = collision {
+				// remove the player
+				commands.entity(player_entity).despawn();
+				// remove the laser
+				commands.entity(elaser_entity).despawn();
+				// spawn ExplosionToSpawn
+				commands
+					.spawn()
+					.insert(ExplosionToSpawn(player_tf.translation.clone()));
 			}
 		}
 	}
