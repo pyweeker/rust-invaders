@@ -19,7 +19,7 @@ impl Plugin for PlayerPlugin {
 			.add_system(laser_movement.system())
 			.add_system_set(
 				SystemSet::new()
-					.with_run_criteria(FixedTimestep::step(2.0))
+					.with_run_criteria(FixedTimestep::step(3.0))
 					.with_system(player_spawn.system()),
 			);
 	}

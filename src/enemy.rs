@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use crate::{
 	ActiveEnemies, ELaser, Enemy, Laser, Materials, PlayerOn, Speed, WinSize, MAX_ENEMIES, SCALE,
 	TIME_STEP,
@@ -11,6 +13,7 @@ impl Plugin for EnemyPlugin {
 	fn build(&self, app: &mut bevy::prelude::AppBuilder) {
 		app
 			.add_system(elaser_movement.system())
+			.add_system(enemy_movement.system())
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(1.0))
@@ -49,9 +52,38 @@ fn enemy_spawn(
 				},
 				..Default::default()
 			})
-			.insert(Enemy);
+			.insert(Enemy)
+			.insert(Speed::default());
 
 		active_enemies.0 += 1;
+	}
+}
+
+fn enemy_movement(time: Res<Time>, mut query: Query<(&mut Transform, &Speed), With<Enemy>>) {
+	let now = time.seconds_since_startup() as f32;
+	let radius = (125., 100.);
+	for (mut tf, speed) in query.iter_mut() {
+		let x_org = tf.translation.x;
+		let y_org = tf.translation.y;
+
+		let angle = speed.0 * TIME_STEP * now % 360. / PI;
+		let x_dst = radius.0 * angle.cos();
+		let y_dst = radius.1 * angle.sin();
+
+		// calculate the delta x/y and distance ratio (dr)
+		let dx = x_org - x_dst;
+		let dy = y_org - y_dst;
+		let dd = (dx * dx + dy * dy).sqrt();
+		let dr = TIME_STEP * speed.0 / dd;
+
+		// calculate the final x/y (make sure to not overshoot)
+		let x = x_org - dx * dr;
+		let x = if dx > 0. { x.max(x_dst) } else { x.min(x_dst) };
+		let y = y_org - dy * dr;
+		let y = if dy > 0. { y.max(y_dst) } else { y.min(y_dst) };
+		// apply to tranformation
+		tf.translation.x = x;
+		tf.translation.y = y;
 	}
 }
 
