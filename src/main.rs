@@ -30,6 +30,7 @@ struct WinSize {
 	h: f32,
 }
 struct ActiveEnemies(u32);
+struct PlayerOn(bool);
 // endregion: Resources
 
 // region:    Components
@@ -140,6 +141,7 @@ fn plaser_hit_enemy(
 
 fn elaser_hit_player(
 	mut commands: Commands,
+	mut player_on: ResMut<PlayerOn>,
 	player_query: Query<(Entity, &Transform, &Sprite), With<Player>>,
 	elaser_query: Query<(Entity, &Transform, &Sprite), With<ELaser>>,
 ) {
@@ -159,6 +161,7 @@ fn elaser_hit_player(
 			if let Some(_) = collision {
 				// remove the player
 				commands.entity(player_entity).despawn();
+				player_on.0 = false;
 				// remove the laser
 				commands.entity(elaser_entity).despawn();
 				// spawn ExplosionToSpawn

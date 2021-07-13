@@ -1,38 +1,55 @@
-use bevy::prelude::*;
+use bevy::{core::FixedTimestep, prelude::*};
 
-use crate::{Laser, Materials, PLaser, Player, PlayerReadyFire, Speed, WinSize, SCALE, TIME_STEP};
+use crate::{
+	Laser, Materials, PLaser, Player, PlayerOn, PlayerReadyFire, Speed, WinSize, SCALE, TIME_STEP,
+};
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
 	fn build(&self, app: &mut AppBuilder) {
 		app
+			.insert_resource(PlayerOn(false))
 			.add_startup_stage(
 				"game_setup_actors",
 				SystemStage::single(player_spawn.system()),
 			)
 			.add_system(player_movement.system())
 			.add_system(player_fire.system())
-			.add_system(laser_movement.system());
+			.add_system(laser_movement.system())
+			.add_system_set(
+				SystemSet::new()
+					.with_run_criteria(FixedTimestep::step(2.0))
+					.with_system(player_spawn.system()),
+			);
 	}
 }
 
-fn player_spawn(mut commands: Commands, materials: Res<Materials>, win_size: Res<WinSize>) {
-	// spawn a sprite
-	let bottom = -win_size.h / 2.;
-	commands
-		.spawn_bundle(SpriteBundle {
-			material: materials.player.clone(),
-			transform: Transform {
-				translation: Vec3::new(0., bottom + 75. / 4. + 5., 10.),
-				scale: Vec3::new(SCALE, SCALE, 1.),
+fn player_spawn(
+	mut commands: Commands,
+	materials: Res<Materials>,
+	win_size: Res<WinSize>,
+	mut player_on: ResMut<PlayerOn>,
+) {
+	if !player_on.0 {
+		// spawn a sprite
+		let bottom = -win_size.h / 2.;
+		commands
+			.spawn_bundle(SpriteBundle {
+				material: materials.player.clone(),
+				transform: Transform {
+					translation: Vec3::new(0., bottom + 75. / 4. + 5., 10.),
+					scale: Vec3::new(SCALE, SCALE, 1.),
+					..Default::default()
+				},
 				..Default::default()
-			},
-			..Default::default()
-		})
-		.insert(Player)
-		.insert(PlayerReadyFire(true))
-		.insert(Speed::default());
+			})
+			.insert(Player)
+			.insert(PlayerReadyFire(true))
+			.insert(Speed::default());
+
+		player_on.0 = true;
+	}
 }
 
 fn player_movement(
