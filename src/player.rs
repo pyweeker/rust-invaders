@@ -1,8 +1,8 @@
-use bevy::{core::FixedTimestep, prelude::*};
+use bevy::{core::FixedTimestep, ecs::schedule::ShouldRun, prelude::*};
 
 use crate::{
-	Laser, Materials, PLaser, Player, PlayerReadyFire, PlayerState, Speed, WinSize,
-	PLAYER_RESPAWN_DELAY, SCALE, TIME_STEP,
+	ELaser, Enemy, Laser, Materials, PLaser, Player, PlayerLastFire, PlayerState, Speed, WinSize,
+	PLAYER_LASER_COOLDOWN, PLAYER_RESPAWN_DELAY, SCALE, TIME_STEP,
 };
 
 pub struct PlayerPlugin;
@@ -16,7 +16,11 @@ impl Plugin for PlayerPlugin {
 				SystemStage::single(player_spawn.system()),
 			)
 			.add_system(player_movement.system())
-			.add_system(player_fire.system())
+			.add_system_set(
+				SystemSet::new()
+					.with_run_criteria(player_can_fire.system())
+					.with_system(player_fire.system()),
+			)
 			.add_system(laser_movement.system())
 			.add_system_set(
 				SystemSet::new()
@@ -49,7 +53,7 @@ fn player_spawn(
 				..Default::default()
 			})
 			.insert(Player)
-			.insert(PlayerReadyFire(true))
+			.insert(PlayerLastFire::default())
 			.insert(Speed::default());
 
 		player_state.spawned();
@@ -72,14 +76,39 @@ fn player_movement(
 	}
 }
 
+fn player_can_fire(
+	time: Res<Time>,
+	laser_query: Query<&PLaser>,
+	player_lastfire_query: Query<&PlayerLastFire>,
+) -> ShouldRun {
+	// println!("->> l: {}", laser_query.iter().count());
+	// println!("->> p: {}", player_query.iter().count());
+	// TODO: limit fire by number of laser from player in the stage
+	if let Ok(last_fire) = player_lastfire_query.single() {
+		let now = time.seconds_since_startup();
+
+		if last_fire.0 + PLAYER_LASER_COOLDOWN < now {
+			ShouldRun::Yes
+		} else {
+			ShouldRun::No
+		}
+	} else {
+		ShouldRun::No
+	}
+}
+
 fn player_fire(
 	mut commands: Commands,
+	time: Res<Time>,
 	kb: Res<Input<KeyCode>>,
 	materials: Res<Materials>,
-	mut query: Query<(&Transform, &mut PlayerReadyFire), With<Player>>,
+	laser_query: Query<&PLaser>, // for debug only
+	mut query: Query<(&Transform, &mut PlayerLastFire), With<Player>>,
 ) {
-	if let Ok((player_tf, mut ready_fire)) = query.single_mut() {
-		if ready_fire.0 && kb.pressed(KeyCode::Space) {
+	let now = time.seconds_since_startup();
+	// println!("->> d: {}", laser_query.iter().count());
+	if let Ok((player_tf, mut last_fire)) = query.single_mut() {
+		if kb.pressed(KeyCode::Space) {
 			let x = player_tf.translation.x;
 			let y = player_tf.translation.y;
 
@@ -103,11 +132,7 @@ fn player_fire(
 			spawn_lasers(x_offset);
 			spawn_lasers(-x_offset);
 
-			ready_fire.0 = false;
-		}
-
-		if kb.just_released(KeyCode::Space) {
-			ready_fire.0 = true;
+			last_fire.0 = now;
 		}
 	}
 }

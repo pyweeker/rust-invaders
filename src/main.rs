@@ -1,4 +1,4 @@
-// #![allow(unused)] // silence unused warnings while learning
+#![allow(unused)] // silence unused warnings while learning
 
 mod enemy;
 mod player;
@@ -19,6 +19,7 @@ const TIME_STEP: f32 = 1. / 60.;
 const MAX_ENEMIES: u32 = 1;
 const MAX_FORMATION_MEMBERS: u32 = 2;
 const PLAYER_RESPAWN_DELAY: f64 = 2.;
+const PLAYER_LASER_COOLDOWN: f64 = 0.125;
 
 // region:    Resources
 pub struct Materials {
@@ -57,13 +58,13 @@ impl PlayerState {
 		self.last_shot = time;
 	}
 }
-
 // endregion: Resources
 
 // region:    Components
 struct Laser;
 struct Player;
-struct PlayerReadyFire(bool);
+#[derive(Default)]
+struct PlayerLastFire(f64);
 struct PLaser;
 
 struct Enemy;
