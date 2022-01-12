@@ -2,7 +2,7 @@ Fixing original project to Bevy 0.6  : Work on progress
 
 ideas : scroll and tiled maps ; parallax
 
-example for GLSL background working with Bevy 0.6 available here : https://github.com/Bobox214/Kataster
+example for GLSL background  available here : https://github.com/Bobox214/Kataster
 
 Wednesay 12 th january:
 
