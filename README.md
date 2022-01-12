@@ -1,5 +1,19 @@
 Fixing original project to Bevy 0.6  : Work on progress
 
+Wednesay 12 th january:
+error[E0277]: the trait bound `bevy::prelude::Vec2: From<bevy::prelude::Vec3>` is not satisfied
+   --> src/main.rs:173:22
+    |
+173 |             let laser_scale = Vec2::from(laser_tf.scale);
+    |                               ^^^^^^^^^^ the trait `From<bevy::prelude::Vec3>` is not implemented for `bevy::prelude::Vec2`
+    |
+    = help: the following implementations were found:
+              <bevy::prelude::Vec2 as From<(f32, f32)>>
+              <bevy::prelude::Vec2 as From<XY<f32>>>
+              <bevy::prelude::Vec2 as From<[f32; 2]>>
+              <bevy::prelude::Vec2 as From<mint::vector::Point2<f32>>>
+              <bevy::prelude::Vec2 as From<mint::vector::Vector2<f32>>>
+note: required by `std::convert::From::from`
 
 ________________________
 Simple RUST Game using the [Bevy Engine](https://bevyengine.org/)
