@@ -1,3 +1,7 @@
+Fixing original project to Bevy 0.6  : Work on progress
+
+
+________________________
 Simple RUST Game using the [Bevy Engine](https://bevyengine.org/)
 
 Fast dev: `cargo watch -q -c -x 'run --features bevy/dynamic'`
