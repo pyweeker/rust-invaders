@@ -1,6 +1,8 @@
 Fixing original project to Bevy 0.6  : Work on progress
 
 Wednesay 12 th january:
+
+
 error[E0277]: the trait bound `bevy::prelude::Vec2: From<bevy::prelude::Vec3>` is not satisfied
    --> src/main.rs:173:22
     |
