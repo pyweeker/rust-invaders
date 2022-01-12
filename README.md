@@ -4,50 +4,41 @@ ideas : scroll and tiled maps ; parallax
 
 example for GLSL background  available here : https://github.com/Bobox214/Kataster
 
-Wednesay 12 th january:
+Wednesay 12 th january:  **Does compile but 3 warning and a bug in the window: **
 
-
-error[E0277]: the trait bound `bevy::prelude::Vec2: From<bevy::prelude::Vec3>` is not satisfied
-   --> src/main.rs:173:22
+warning: unused variable: `materials`
+   --> src/main.rs:126:6
     |
-173 |             let laser_scale = Vec2::from(laser_tf.scale);
-    |                               ^^^^^^^^^^ the trait `From<bevy::prelude::Vec3>` is not implemented for `bevy::prelude::Vec2`
+126 |     mut materials: ResMut<Assets<ColorMaterial>>,
+    |         ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_materials`
     |
-    = help: the following implementations were found:
-              <bevy::prelude::Vec2 as From<(f32, f32)>>
-              <bevy::prelude::Vec2 as From<XY<f32>>>
-              <bevy::prelude::Vec2 as From<[f32; 2]>>
-              <bevy::prelude::Vec2 as From<mint::vector::Point2<f32>>>
-              <bevy::prelude::Vec2 as From<mint::vector::Vector2<f32>>>
-note: required by `std::convert::From::from`
+    = note: `#[warn(unused_variables)]` on by default
 
-________________________
-Simple RUST Game using the [Bevy Engine](https://bevyengine.org/)
+warning: variable does not need to be mutable
+   --> src/main.rs:126:2
+    |
+126 |     mut materials: ResMut<Assets<ColorMaterial>>,
+    |     ----^^^^^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
 
-Fast dev: `cargo watch -q -c -x 'run --features bevy/dynamic'`
+warning: field is never read: `group_id`
+  --> src/enemy.rs:21:2
+   |
+21 |     group_id: u32,
+   |     ^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
 
-- YouTube videos for this code base:
-    - [Episode 1](https://youtu.be/Yb3vInxzKGE) - Rust Game Development tutorial from Scratch with Bevy Engine
-    - [Episode 2](https://youtu.be/Dl4PJG0eRhg) - bi-lasers, enemy spawn, explosion animation
-    - [Episode 3](https://youtu.be/4nEUX2hf2ZI) - Enemy Approach, Formation, and Laser
-- Other Rust videos:
-    - Weekly Rust Videos at [Jeremy Chone](https://www.youtube.com/jeremychone) channel
-    - [Rust Game Development Tutorials](https://youtube.com/playlist?list=PL7r-PXl6ZPcCB_9zZFU0krBoGK3y5f5Vt)
+warning: `rust-invaders` (bin "rust-invaders") generated 3 warnings
+    Finished dev [unoptimized + debuginfo] target(s) in 0.07s
+     Running `target/debug/rust-invaders RUST_BACKTRACE=1`
+2022-01-12T19:53:00.408206Z  WARN winit::platform_impl::platform::x11::util::randr: XRandR reported that the display's 0mm in size, which is certifiably insane    
+2022-01-12T19:53:00.408897Z  INFO winit::platform_impl::platform::x11::window: Guessed window scale factor: 1    
+MESA-INTEL: warning: Performance support disabled, consider sysctl dev.i915.perf_stream_paranoid=0
+
+MESA-INTEL: warning: Performance support disabled, consider sysctl dev.i915.perf_stream_paranoid=0
 
 
-## Rust & Bevy & Other Resources
-
-- Rust: 
-    - [Rust Book](https://doc.rust-lang.org/book/)
-    - [Rust Video Course](https://www.youtube.com/playlist?list=PL7r-PXl6ZPcB4jn1_VR3D8tSK9DxOaiQE)
-- Bevy: 
-    - [Official Bevy Web Site](https://bevyengine.org/)
-    - [Official Bevy Book](https://bevyengine.org/learn/book/introduction/)
-    - [Unofficial Bevy Cheat Book](https://bevy-cheatbook.github.io/)
-    - [Official Bevy API Doc](https://docs.rs/bevy/0.5.0/bevy/)
-    - [Official Bevy Assets](https://bevyengine.org/assets/)
-    - [Offical GitHub examples](https://github.com/bevyengine/bevy/tree/latest/examples)
-    - [Great Blog Post - snake game](https://mbuffett.com/posts/bevy-snake-tutorial/)
-- Assets: 
-    - [Player, Laser, Enemy Sprites](https://opengameart.org/content/space-shooter-redux)
-    - [Explosion](https://opengameart.org/content/explosion)    
